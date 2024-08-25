@@ -12,7 +12,7 @@ import {
 import { ExampleView, VIEW_TYPE_EXAMPLE } from "./example-view";
 
 // Remember to rename these classes and interfaces!
-console.log("hot reload");
+console.log("hot reload 4");
 
 interface MyPluginSettings {
 	mySetting: string;
