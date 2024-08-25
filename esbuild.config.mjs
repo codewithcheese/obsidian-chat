@@ -1,5 +1,7 @@
+import * as fs from "node:fs";
+import * as path from "node:path";
+import * as process from "node:process";
 import esbuild from "esbuild";
-import process from "process";
 import builtins from "builtin-modules";
 
 const banner =
@@ -15,7 +17,7 @@ const context = await esbuild.context({
 	banner: {
 		js: banner,
 	},
-	entryPoints: ["main.ts"],
+	entryPoints: ["src/main.ts", "src/styles.css"],
 	bundle: true,
 	external: [
 		"obsidian",
@@ -37,13 +39,19 @@ const context = await esbuild.context({
 	logLevel: "info",
 	sourcemap: prod ? false : "inline",
 	treeShaking: true,
-	outfile: "main.js",
+	outdir: "./build",
 	minify: prod,
 });
 
+async function copyManifest() {
+	await fs.promises.copyFile('./manifest.json', path.join('./build', 'manifest.json'));
+}
+
 if (prod) {
 	await context.rebuild();
+	await copyManifest();
 	process.exit(0);
 } else {
 	await context.watch();
+	await copyManifest();
 }
