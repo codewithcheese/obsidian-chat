@@ -3,16 +3,20 @@ import {
 	Editor,
 	MarkdownView,
 	Modal,
-	Notice,
 	Plugin,
 	PluginSettingTab,
 	Setting,
 	type WorkspaceLeaf,
 } from "obsidian";
-import { ExampleView, VIEW_TYPE_EXAMPLE } from "./example-view";
+import { VIEW_TYPE_EXAMPLE } from "./example-view";
+import {
+	CHAT_FILE_VIEW_EXTENSION,
+	CHAT_FILE_VIEW_TYPE,
+	ChatFileView,
+} from "./chat-file-view";
 
 // Remember to rename these classes and interfaces!
-console.log("hot reload 4");
+console.log("hot reload 5");
 
 interface MyPluginSettings {
 	mySetting: string;
@@ -28,7 +32,23 @@ export default class MyPlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
-		this.registerView(VIEW_TYPE_EXAMPLE, (leaf) => new ExampleView(leaf));
+		this.registerView(
+			CHAT_FILE_VIEW_TYPE,
+			(leaf) => new ChatFileView(leaf)
+		);
+
+		this.registerExtensions(
+			[CHAT_FILE_VIEW_EXTENSION],
+			CHAT_FILE_VIEW_TYPE
+		);
+
+		this.addCommand({
+			id: "new-chat",
+			name: "New chat",
+			callback: () => this.createChatFile(),
+		});
+
+		// this.registerView(VIEW_TYPE_EXAMPLE, (leaf) => new ExampleView(leaf));
 
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon(
@@ -60,7 +80,7 @@ export default class MyPlugin extends Plugin {
 			id: "sample-editor-command",
 			name: "Sample editor command",
 			editorCallback: (editor: Editor, view: MarkdownView) => {
-				console.log(editor.getSelection());
+				// console.log(editor.getSelection());
 				editor.replaceSelection("Sample Editor Command");
 			},
 		});
@@ -91,7 +111,7 @@ export default class MyPlugin extends Plugin {
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
 		this.registerDomEvent(document, "click", (evt: MouseEvent) => {
-			console.log("click", evt);
+			// console.log("click", evt);
 		});
 
 		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
@@ -132,6 +152,18 @@ export default class MyPlugin extends Plugin {
 
 		// "Reveal" the leaf in case it is in a collapsed sidebar
 		workspace.revealLeaf(leaf);
+	}
+
+	async createChatFile() {
+		const newFile = await this.app.vault.create(
+			"Untitled.chat",
+			JSON.stringify({
+				title: "Untitled",
+				content: "Hello world",
+			})
+		);
+
+		this.app.workspace.getLeaf(false).openFile(newFile);
 	}
 }
 
